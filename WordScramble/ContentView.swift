@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var usedWords: [String] = []
     @State private var rootWord = ""
     @State private var newWord = ""
+    @FocusState private var textFieldFocused: Bool
     
     @State private var errorTitle = ""
     @State private var errorMessage = ""
@@ -22,16 +23,21 @@ struct ContentView: View {
             List {
                 Section {
                     TextField("Enter your word", text: $newWord)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .focused($textFieldFocused)
                 }
-                Section("Section 2") {
-                    ForEach(usedWords, id: \.self) { word in
-                        HStack {
-                            Image(systemName: "\(word.count).circle")
-                            Text(word)
-                                .autocapitalization(.none)
+                if usedWords.count > 0 {
+                    Section("Words") {
+                        ForEach(usedWords, id: \.self) { word in
+                            HStack {
+                                Image(systemName: "\(word.count).circle")
+                                Text(word)
+                            }
                         }
                     }
                 }
+                
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
@@ -40,6 +46,21 @@ struct ContentView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Restart") {
+                        startGame()
+                    }
+                }
+                ToolbarItem(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            textFieldFocused = false
+                        }
+                    }
+                }
             }
         }
         .navigationViewStyle(.stack)
@@ -55,6 +76,8 @@ struct ContentView: View {
                 // 4. Pick one random word, or use "silkworm" as a sensible default
                 rootWord = allWords.randomElement() ?? "silkworm"
                 
+                // 5. Empty the list
+                usedWords = []
                 // If we are here everything has worked, so we can exit
                 return
             }
@@ -96,6 +119,9 @@ struct ContentView: View {
     }
     
     func addNewWord() {
+        // Set TextField Focus
+        textFieldFocused = true
+        
         // lowercase and trim the word, to make sure we don't add duplicate words with case difference
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
