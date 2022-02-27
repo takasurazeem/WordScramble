@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var score = 0
     
     var body: some View {
         NavigationView {
@@ -28,7 +29,13 @@ struct ContentView: View {
                         .focused($textFieldFocused)
                 }
                 if usedWords.count > 0 {
-                    Section("Words") {
+                    Section("Words & Score") {
+                        HStack {
+                            Text("Score")
+                            Spacer()
+                            Text("\(score)")
+                        }
+                        .font(.headline)
                         ForEach(usedWords, id: \.self) { word in
                             HStack {
                                 Image(systemName: "\(word.count).circle")
@@ -37,7 +44,6 @@ struct ContentView: View {
                         }
                     }
                 }
-                
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
@@ -67,6 +73,9 @@ struct ContentView: View {
     }
     
     func startGame() {
+        // 0. set the score to zero
+        score = 0
+        
         // 1. Find the URL for start.txt in our app bundle
         if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: ".txt") {
             // 2. Load start.txt into a string
@@ -148,6 +157,8 @@ struct ContentView: View {
         
         withAnimation {
             usedWords.insert(answer, at: 0)
+            // award user with word count
+            score += answer.count
         }
         newWord = ""
     }
