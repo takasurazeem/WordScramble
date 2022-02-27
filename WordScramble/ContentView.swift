@@ -100,7 +100,8 @@ struct ContentView: View {
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
         // exit if the remaining string is empty
-        guard answer.count > 0 else {
+        guard answer.count > 1 else {
+            wordError(title: "Word too short", message: "A letter is not a word!")
             return
         }
         
